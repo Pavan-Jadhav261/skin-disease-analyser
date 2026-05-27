@@ -277,17 +277,9 @@ export default function DetectPage() {
                   <Button
                     onClick={resetForm}
                     variant="outline"
-                    className="flex-1 border-border bg-transparent"
+                    className="w-full border-border bg-transparent"
                   >
                     Analyze Another Image
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      window.location.href = '/contact'
-                    }}
-                    className="flex-1 bg-accent text-white hover:bg-accent/90"
-                  >
-                    Get Support
                   </Button>
                 </div>
               </div>
