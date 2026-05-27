@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import Link from 'next/link'
 
 export function LoginForm() {
   const router = useRouter()
@@ -106,15 +105,8 @@ export function LoginForm() {
           )}
         </Button>
 
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="text-muted-foreground">Need an account?</span>
-          <Link href="/register" className="font-medium text-primary transition-colors hover:text-primary/90">
-            Register
-          </Link>
-        </div>
-
         <p className="text-xs text-muted-foreground">
-          Use the credentials configured in your local `.env` file.
+          Demo login: <span className="font-medium text-foreground">admin</span> / <span className="font-medium text-foreground">1234</span>
         </p>
       </form>
     </Card>

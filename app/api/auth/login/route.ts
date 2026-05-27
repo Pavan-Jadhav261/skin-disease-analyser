@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 
 import { AUTH_COOKIE_NAME, signAuthToken } from '@/lib/auth'
-import { authenticateUser } from '@/lib/user-store'
+
+const DUMMY_USERNAME = 'admin'
+const DUMMY_PASSWORD = '1234'
 
 export async function POST(request: Request) {
   try {
@@ -9,22 +11,20 @@ export async function POST(request: Request) {
     const username = typeof body?.username === 'string' ? body.username : ''
     const password = typeof body?.password === 'string' ? body.password : ''
 
-    const user = await authenticateUser(username, password)
-
-    if (!user) {
+    if (username !== DUMMY_USERNAME || password !== DUMMY_PASSWORD) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid username or password.',
+          error: 'Invalid username or password. Use admin / 1234.',
         },
         { status: 401 },
       )
     }
 
-    const token = await signAuthToken({ username: user.username })
+    const token = await signAuthToken({ username })
     const response = NextResponse.json({
       success: true,
-      username: user.username,
+      username,
     })
 
     response.cookies.set(AUTH_COOKIE_NAME, token, {
