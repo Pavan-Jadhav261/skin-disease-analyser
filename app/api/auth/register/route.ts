@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { AUTH_COOKIE_NAME, signAuthToken } from '@/lib/auth'
-import { authenticateUser, recordLogin } from '@/lib/local-store'
+import { recordLogin, registerUser } from '@/lib/local-store'
 
 export async function POST(request: Request) {
   try {
@@ -9,22 +9,22 @@ export async function POST(request: Request) {
     const username = typeof body?.username === 'string' ? body.username : ''
     const password = typeof body?.password === 'string' ? body.password : ''
 
-    const user = await authenticateUser(username, password)
+    const result = await registerUser(username, password)
 
-    if (!user) {
+    if (!result.success) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid username or password. Use admin / 1234 or a registered account.',
+          error: result.error,
         },
-        { status: 401 },
+        { status: 400 },
       )
     }
 
-    const token = await signAuthToken({ username: user.username })
+    const token = await signAuthToken({ username: result.user.username })
     const response = NextResponse.json({
       success: true,
-      username: user.username,
+      username: result.user.username,
     })
 
     response.cookies.set(AUTH_COOKIE_NAME, token, {
@@ -35,18 +35,19 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7,
     })
 
-    await recordLogin(user.username)
+    await recordLogin(result.user.username)
 
     return response
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Register error:', error)
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Unable to sign in right now.',
+        error: 'Unable to register right now.',
       },
       { status: 500 },
     )
   }
 }
+

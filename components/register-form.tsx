@@ -1,32 +1,35 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { LogIn, ShieldAlert } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { CheckCircle2, LogIn, ShieldAlert } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-export function LoginForm() {
+export function RegisterForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const nextPath = searchParams.get('next') || '/detect'
-
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setIsSubmitting(true)
     setErrorMessage('')
 
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match.')
+      return
+    }
+
+    setIsSubmitting(true)
+
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,45 +40,59 @@ export function LoginForm() {
       const data = await response.json().catch(() => null)
 
       if (!response.ok) {
-        setErrorMessage(data?.error || 'Sign in failed.')
+        setErrorMessage(data?.error || 'Registration failed.')
         return
       }
 
-      router.push(nextPath)
+      router.push('/detect')
       router.refresh()
     } catch (error) {
-      console.error('Login form error:', error)
-      setErrorMessage('Unable to sign in right now.')
+      console.error('Register form error:', error)
+      setErrorMessage('Unable to register right now.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <Card className="border-border/70 bg-white/85 p-6 shadow-2xl shadow-slate-950/5 backdrop-blur">
+    <Card className="border-border/70 bg-white/90 p-6 shadow-2xl shadow-slate-950/5 backdrop-blur">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="register-username">Username</Label>
           <Input
-            id="username"
+            id="register-username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             autoComplete="username"
-            placeholder="Enter your username"
+            placeholder="Choose a username"
             className="border-border bg-white"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="register-password">Password</Label>
           <Input
-            id="password"
+            id="register-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            placeholder="Enter your password"
+            autoComplete="new-password"
+            placeholder="Create a password"
+            className="border-border bg-white"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirm-password">Confirm password</Label>
+          <Input
+            id="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            autoComplete="new-password"
+            placeholder="Re-enter your password"
             className="border-border bg-white"
             required
           />
@@ -86,7 +103,12 @@ export function LoginForm() {
             <ShieldAlert className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <p>{errorMessage}</p>
           </div>
-        ) : null}
+        ) : (
+          <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <p>Your account will be saved locally and signed in immediately.</p>
+          </div>
+        )}
 
         <Button
           type="submit"
@@ -96,27 +118,17 @@ export function LoginForm() {
           {isSubmitting ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Signing in...
+              Creating account...
             </>
           ) : (
             <>
               <LogIn className="h-4 w-4" />
-              Sign in
+              Register
             </>
           )}
         </Button>
-
-        <p className="text-xs text-muted-foreground">
-          Demo login: <span className="font-medium text-foreground">admin</span> / <span className="font-medium text-foreground">1234</span>
-        </p>
-
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="text-muted-foreground">Need a new account?</span>
-          <Link href="/register" className="font-medium text-primary transition-colors hover:text-primary/90">
-            Register
-          </Link>
-        </div>
       </form>
     </Card>
   )
 }
+

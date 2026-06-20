@@ -10,4 +10,9 @@ node_modules/
 .next/
 .env
 .env*.local
+.vscode/
+.idea/
+.turbo/
+.data/
+data/app-state.runtime.json
 .DS_Store

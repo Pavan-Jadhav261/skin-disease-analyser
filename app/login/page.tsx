@@ -27,7 +27,7 @@ export default async function LoginPage() {
                 Sign in to use the skin analysis workspace
               </h1>
               <p className="max-w-xl text-lg leading-8 text-slate-600">
-                Use the demo credentials `admin` and `1234` to access the OpenAI-powered detector. Sessions are protected with a JWT cookie.
+                Use the demo credentials `admin` and `1234`, or register a new local account, to access the OpenAI-powered detector.
               </p>
             </div>
 

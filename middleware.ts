@@ -13,25 +13,26 @@ function getSecret() {
   return new TextEncoder().encode(secret)
 }
 
-async function hasValidSession(request: NextRequest) {
+async function getSessionUsername(request: NextRequest) {
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value
   const secret = getSecret()
 
   if (!token || !secret) {
-    return false
+    return null
   }
 
   try {
-    await jwtVerify(token, secret)
-    return true
+    const result = await jwtVerify(token, secret)
+    return typeof result.payload.username === 'string' ? result.payload.username : null
   } catch {
-    return false
+    return null
   }
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const authenticated = await hasValidSession(request)
+  const username = await getSessionUsername(request)
+  const authenticated = Boolean(username)
 
   if (pathname.startsWith('/detect') && !authenticated) {
     const url = request.nextUrl.clone()
@@ -47,10 +48,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  if (pathname.startsWith('/register') && authenticated) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/detect'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
+  if (pathname.startsWith('/admin')) {
+    if (!authenticated) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('next', '/admin')
+      return NextResponse.redirect(url)
+    }
+
+    if (username !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/detect'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/detect/:path*', '/login'],
+  matcher: ['/detect/:path*', '/login', '/register', '/admin', '/admin/:path*'],
 }
-

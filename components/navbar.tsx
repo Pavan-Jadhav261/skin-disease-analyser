@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 export function Navbar() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -21,10 +22,12 @@ export function Navbar() {
 
         if (active) {
           setIsAuthenticated(Boolean(data?.authenticated))
+          setIsAdmin(Boolean(data?.isAdmin))
         }
       } catch {
         if (active) {
           setIsAuthenticated(false)
+          setIsAdmin(false)
         }
       } finally {
         if (active) {
@@ -71,6 +74,11 @@ export function Navbar() {
             <Link href="/contact" className="text-foreground transition-colors hover:text-primary">
               Contact
             </Link>
+            {isAuthenticated && isAdmin ? (
+              <Link href="/admin" className="text-foreground transition-colors hover:text-primary">
+                Admin
+              </Link>
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2">
@@ -84,11 +92,18 @@ export function Navbar() {
                 Logout
               </Button>
             ) : (
-              <Link href="/login">
-                <Button variant="outline" className="hidden border-border bg-transparent md:inline-flex">
-                  Login
-                </Button>
-              </Link>
+              <div className="hidden items-center gap-2 md:flex">
+                <Link href="/login">
+                  <Button variant="outline" className="border-border bg-transparent">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-primary text-white hover:bg-primary/90">
+                    Register
+                  </Button>
+                </Link>
+              </div>
             )}
 
             <Link href="/detect">

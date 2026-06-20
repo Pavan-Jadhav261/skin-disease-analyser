@@ -2,6 +2,7 @@
 
 import { detectSkinDisease } from '@/lib/skinDiseaseDetector';
 import { getAuthSession } from '@/lib/auth';
+import { recordAnalysis } from '@/lib/local-store';
 
 export async function analyzeSkinCondition(formData: FormData) {
     const session = await getAuthSession();
@@ -27,7 +28,13 @@ export async function analyzeSkinCondition(formData: FormData) {
 
     try {
         const result = await detectSkinDisease(imageBuffer, mimeType, symptoms);
-        return { success: true, data: result };
+        const historyEntry = await recordAnalysis(session.username, result);
+
+        return {
+            success: true,
+            data: result,
+            historyEntry,
+        };
     } catch (error) {
         console.error("Error analyzing skin condition:", error);
         return {
