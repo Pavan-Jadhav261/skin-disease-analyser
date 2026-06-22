@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   AlertCircle,
@@ -8,6 +8,7 @@ import {
   Clock3,
   History,
   PanelLeft,
+  Plus,
   Sparkles,
   Upload,
   Zap,
@@ -71,6 +72,7 @@ export default function DetectPage() {
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([])
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const hasInitializedHistorySelectionRef = useRef(false)
 
   useEffect(() => {
     let active = true
@@ -87,8 +89,13 @@ export default function DetectPage() {
         const entries = Array.isArray(data?.history) ? (data.history as HistoryEntry[]) : []
         setHistoryEntries(entries)
 
-        if (!selectedHistoryId && entries.length > 0) {
+        if (!hasInitializedHistorySelectionRef.current && entries.length > 0) {
           setSelectedHistoryId(entries[0].id)
+          hasInitializedHistorySelectionRef.current = true
+        }
+
+        if (!hasInitializedHistorySelectionRef.current) {
+          hasInitializedHistorySelectionRef.current = true
         }
       } catch (error) {
         console.error('Failed to load history:', error)
@@ -103,10 +110,10 @@ export default function DetectPage() {
   }, [])
 
   useEffect(() => {
-    if (!selectedHistoryId && historyEntries[0]) {
-      setSelectedHistoryId(historyEntries[0].id)
+    if (historyEntries.length === 0) {
+      hasInitializedHistorySelectionRef.current = true
     }
-  }, [historyEntries, selectedHistoryId])
+  }, [historyEntries.length])
 
   const selectedEntry = useMemo(
     () => historyEntries.find((entry) => entry.id === selectedHistoryId) || null,
@@ -209,6 +216,11 @@ export default function DetectPage() {
     setSelectedHistoryId(null)
   }
 
+  const handleStartNewChat = () => {
+    resetForm()
+    setIsHistoryOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -219,18 +231,29 @@ export default function DetectPage() {
           className="w-[320px] border-slate-200 bg-slate-50 p-0 text-slate-900"
         >
           <SheetHeader className="border-b border-slate-200 px-5 py-5 text-left">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700">
-                <History className="h-5 w-5" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700">
+                  <History className="h-5 w-5" />
+                </div>
+                <div>
+                  <SheetTitle className="text-lg font-semibold text-slate-950">
+                    History
+                  </SheetTitle>
+                  <SheetDescription className="text-sm text-slate-500">
+                    Recent analysis sessions
+                  </SheetDescription>
+                </div>
               </div>
-              <div>
-                <SheetTitle className="text-lg font-semibold text-slate-950">
-                  History
-                </SheetTitle>
-                <SheetDescription className="text-sm text-slate-500">
-                  Recent analysis sessions
-                </SheetDescription>
-              </div>
+
+              <Button
+                type="button"
+                onClick={handleStartNewChat}
+                className="shrink-0 rounded-full bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                New chat
+              </Button>
             </div>
           </SheetHeader>
 
@@ -471,7 +494,7 @@ export default function DetectPage() {
 
                   <div className="flex gap-4">
                     <Button
-                      onClick={resetForm}
+                      onClick={handleStartNewChat}
                       variant="outline"
                       className="w-full border-slate-300 bg-transparent"
                     >
