@@ -9,7 +9,7 @@ instrumentation-client.ts
 node_modules/
 .next/
 .env
-.env*.local
+
 .vscode/
 .idea/
 .turbo/

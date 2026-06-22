@@ -71,9 +71,7 @@ export function Navbar() {
             <Link href="/about" className="text-foreground transition-colors hover:text-primary">
               About
             </Link>
-            <Link href="/contact" className="text-foreground transition-colors hover:text-primary">
-              Contact
-            </Link>
+            
             {isAuthenticated && isAdmin ? (
               <Link href="/admin" className="text-foreground transition-colors hover:text-primary">
                 Admin
